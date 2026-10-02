@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://ionl23knucep"]
+
+[ext_resource type="Script" uid="uid://bmme8lsmvdmka" path="res://Enemy/character_body_2d.gd" id="1_j1mmh"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_nah0x"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_nah0x"]
+radius = 24.0
+
+[node name="CharacterBody2D" type="CharacterBody2D" unique_id=223447204]
+script = ExtResource("1_j1mmh")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=673241760]
+shape = SubResource("RectangleShape2D_nah0x")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=360468270]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=288130063]
+shape = SubResource("CircleShape2D_nah0x")

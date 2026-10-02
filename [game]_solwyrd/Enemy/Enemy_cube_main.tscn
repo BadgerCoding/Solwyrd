@@ -1,0 +1,66 @@
+[gd_scene format=3 uid="uid://c5ra1vsws375f"]
+
+[ext_resource type="Script" uid="uid://bmme8lsmvdmka" path="res://Enemy/character_body_2d.gd" id="1_y2bdk"]
+[ext_resource type="Texture2D" uid="uid://83o5aoga7u2v" path="res://Enemy/Enemy_Cube_1.png" id="2_4necw"]
+[ext_resource type="Texture2D" uid="uid://balm8q2k38u2j" path="res://Enemy/Enemy_Cube_2.png" id="3_1ermd"]
+[ext_resource type="Texture2D" uid="uid://b3x22ykr62pw" path="res://Enemy/Enemy_Cube_3.png" id="4_37ab8"]
+[ext_resource type="Texture2D" uid="uid://bv8x3snc280op" path="res://Enemy/Enemy_Cube_4.png" id="5_2hq0h"]
+[ext_resource type="Texture2D" uid="uid://dnj3pae5k32g7" path="res://Enemy/Enemy_Cube_5.png" id="6_c5ugp"]
+[ext_resource type="Texture2D" uid="uid://da2eh3d47fjmw" path="res://Enemy/Enemy_Cube_6.png" id="7_rygtx"]
+[ext_resource type="Texture2D" uid="uid://br76vhsw7o12i" path="res://Enemy/Enemy_Cube_7.png" id="8_e57el"]
+[ext_resource type="Texture2D" uid="uid://dkq04tryun4q7" path="res://Enemy/Enemy_Cube_8.png" id="9_ap6sp"]
+[ext_resource type="Texture2D" uid="uid://b3757d05qc4yu" path="res://Enemy/Enemy_Cube_9.png" id="10_a8cuf"]
+[ext_resource type="Texture2D" uid="uid://c71c88p6swvmr" path="res://Enemy/Enemy_Cube_10.png" id="11_ybp8v"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_vgscf"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_4necw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_1ermd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_37ab8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_2hq0h")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_c5ugp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_rygtx")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_e57el")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_ap6sp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_a8cuf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_ybp8v")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 15.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7gkw8"]
+size = Vector2(32, 32)
+
+[node name="CharacterBody2D" type="CharacterBody2D" unique_id=1793963469]
+script = ExtResource("1_y2bdk")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1709106392]
+scale = Vector2(5, 5)
+sprite_frames = SubResource("SpriteFrames_vgscf")
+animation = &"idle"
+frame_progress = 0.22179976
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=599205374]
+shape = SubResource("RectangleShape2D_7gkw8")

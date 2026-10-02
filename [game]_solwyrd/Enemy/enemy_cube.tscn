@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://dt0mj0hqdw1b7"]
+
+[ext_resource type="PackedScene" uid="uid://c5ra1vsws375f" path="res://Enemy/Enemy_cube_main.tscn" id="1_fddx2"]
+
+[node name="Enemy" type="Node2D" unique_id=431824916]
+
+[node name="CharacterBody2D" parent="." unique_id=1793963469 instance=ExtResource("1_fddx2")]

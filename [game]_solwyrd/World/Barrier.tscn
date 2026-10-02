@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://ckgyc8vc54oop"]
+
+[ext_resource type="PackedScene" uid="uid://6r806iresncq" path="res://World/BarrierOG.tscn" id="1_5pin5"]
+
+[node name="Area2D" type="Area2D" unique_id=1075453054]
+
+[node name="RigidBody2D" parent="." unique_id=323190854 instance=ExtResource("1_5pin5")]
