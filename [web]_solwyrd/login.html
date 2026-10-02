@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Log In — PB's Scan and Fun</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.13.2/firebase-app-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.13.2/firebase-auth-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.13.2/firebase-firestore-compat.js"></script>
+
+<style>
+  :root{
+    --bg:#100a24; --panel:#1c1240; --panel2:#241854; --line:#4a3b8a;
+    --cyan:#4de8d4; --pink:#ff5d8f; --yellow:#ffd23f; --text:#eae6ff; --text-dim:#a89fd6;
+    padding-top: env(safe-area-inset-top,0px); padding-bottom: env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;}
+  html{height:100%; scroll-padding-top:env(safe-area-inset-top,0px);}
+  body{
+    height:100%; margin:0; display:flex; align-items:center; justify-content:center;
+    background:var(--bg); color:var(--text); font-family:'VT323',monospace; font-size:20px;
+    padding:24px;
+  }
+  .card{
+    width:100%; max-width:380px;
+    border:4px solid var(--line);
+    box-shadow:0 0 0 4px var(--bg), 0 0 0 8px var(--line);
+    background:var(--panel);
+    padding:32px 28px;
+  }
+  h1{
+    font-family:'Press Start 2P',monospace; font-size:16px; color:var(--yellow);
+    text-align:center; margin:0 0 6px;
+  }
+  .sub{ text-align:center; color:var(--text-dim); font-size:18px; margin:0 0 26px;}
+  label{ display:block; font-size:16px; color:var(--text-dim); margin-bottom:6px;}
+  input{
+    width:100%; background:var(--bg); border:2px solid var(--line); color:var(--text);
+    font-family:'VT323',monospace; font-size:20px; padding:10px 12px; margin-bottom:16px;
+  }
+  input:focus{ outline:2px solid var(--cyan); }
+  button{
+    width:100%; font-family:'Press Start 2P',monospace; font-size:12px;
+    padding:14px; background:var(--pink); color:#100a24; border:0;
+    box-shadow:4px 4px 0 var(--line); cursor:pointer; margin-top:6px;
+  }
+  button:active{ box-shadow:2px 2px 0 var(--line); transform:translate(2px,2px); }
+  button:disabled{ opacity:.6; cursor:default; }
+  .switch{
+    text-align:center; margin-top:18px; font-size:17px; color:var(--text-dim);
+  }
+  .switch a{ color:var(--cyan); cursor:pointer; text-decoration:underline; }
+  .msg{
+    font-size:16px; margin:-6px 0 16px; min-height:20px;
+  }
+  .msg.error{ color:var(--pink); }
+  .msg.ok{ color:var(--cyan); }
+  .back{
+    display:block; text-align:center; margin-top:22px;
+    font-family:'Press Start 2P',monospace; font-size:11px;
+    color:var(--cyan); text-decoration:none;
+    padding:12px; border:2px solid var(--cyan); background:var(--panel2);
+  }
+  .back:active{ transform:translate(2px,2px); }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1 id="formTitle">LOG IN</h1>
+  <p class="sub">PB's Scan and Fun</p>
+
+  <p class="msg" id="msg"></p>
+
+  <form id="authForm">
+    <label for="email">Email</label>
+    <input type="email" id="email" required autocomplete="email">
+
+    <label for="password">Password</label>
+    <input type="password" id="password" required autocomplete="current-password" minlength="6">
+
+    <button type="submit" id="submitBtn">LOG IN</button>
+  </form>
+
+  <p class="switch">
+    <span id="switchText">Don't have an account? <a id="switchLink">Sign up</a></span>
+  </p>
+
+  <a class="back" href="index.html">&larr; BACK TO HOME</a>
+</div>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDe9YyitZB8W3Vi3sxSqdNEdSBdy_bx4Z8",
+    authDomain: "pb-s-scan-and-fun.firebaseapp.com",
+    projectId: "pb-s-scan-and-fun",
+    storageBucket: "pb-s-scan-and-fun.firebasestorage.app",
+    messagingSenderId: "518357088614",
+    appId: "1:518357088614:web:6a80004c6425c0e8b8b0a7"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  let mode = "login"; // or "signup"
+
+  const form = document.getElementById('authForm');
+  const msg = document.getElementById('msg');
+  const submitBtn = document.getElementById('submitBtn');
+  const formTitle = document.getElementById('formTitle');
+  const switchText = document.getElementById('switchText');
+
+  function setMsg(text, kind){
+    msg.textContent = text || "";
+    msg.className = "msg" + (kind ? " " + kind : "");
+  }
+
+  function renderMode(){
+    if(mode === "login"){
+      formTitle.textContent = "LOG IN";
+      submitBtn.textContent = "LOG IN";
+      switchText.innerHTML = 'Don\'t have an account? <a id="switchLink">Sign up</a>';
+    } else {
+      formTitle.textContent = "SIGN UP";
+      submitBtn.textContent = "CREATE ACCOUNT";
+      switchText.innerHTML = 'Already have an account? <a id="switchLink">Log in</a>';
+    }
+    document.getElementById('switchLink').addEventListener('click', () => {
+      mode = mode === "login" ? "signup" : "login";
+      setMsg("");
+      renderMode();
+    });
+  }
+  renderMode();
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    submitBtn.disabled = true;
+    setMsg("");
+
+    try {
+      if(mode === "signup"){
+        const cred = await auth.createUserWithEmailAndPassword(email, password);
+        await db.collection('users').doc(cred.user.uid).set({
+          email: email,
+          role: "student",
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+          loginCount: 1
+        });
+      } else {
+        const cred = await auth.signInWithEmailAndPassword(email, password);
+        await db.collection('users').doc(cred.user.uid).set({
+          lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+          loginCount: firebase.firestore.FieldValue.increment(1)
+        }, { merge: true });
+      }
+      setMsg("Success! Redirecting...", "ok");
+      window.location.href = "dashboard.html";
+    } catch (err) {
+      const map = {
+        'auth/email-already-in-use': 'That email already has an account. Try logging in.',
+        'auth/invalid-email': 'That email address looks invalid.',
+        'auth/weak-password': 'Password should be at least 6 characters.',
+        'auth/wrong-password': 'Incorrect password.',
+        'auth/user-not-found': 'No account found with that email.',
+        'auth/invalid-credential': 'Incorrect email or password.'
+      };
+      setMsg(map[err.code] || err.message, "error");
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+
+  // If already logged in, skip straight to dashboard
+  auth.onAuthStateChanged((user) => {
+    if(user) window.location.href = "dashboard.html";
+  });
+</script>
+
+</body>
+</html>

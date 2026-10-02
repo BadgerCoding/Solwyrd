@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dashboard — PB's Scan and Fun</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.13.2/firebase-app-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.13.2/firebase-auth-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.13.2/firebase-firestore-compat.js"></script>
+
+<style>
+  :root{
+    --bg:#100a24; --panel:#1c1240; --panel2:#241854; --line:#4a3b8a;
+    --cyan:#4de8d4; --pink:#ff5d8f; --yellow:#ffd23f; --green:#5be08a;
+    --text:#eae6ff; --text-dim:#a89fd6;
+    padding-top: env(safe-area-inset-top,0px); padding-bottom: env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-padding-top:env(safe-area-inset-top,0px);}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'VT323',monospace; font-size:19px; min-height:100vh;
+  }
+  .shell{ display:flex; min-height:100vh; }
+
+  .sidebar{
+    width:220px; flex-shrink:0; background:var(--panel);
+    border-right:4px solid var(--line); padding:24px 16px;
+    padding-top: calc(24px + env(safe-area-inset-top,0px));
+  }
+  .brand{
+    font-family:'Press Start 2P',monospace; font-size:13px; color:var(--yellow);
+    margin-bottom:34px; text-align:center;
+  }
+  .nav-item{
+    display:flex; align-items:center; gap:10px;
+    padding:12px 10px; color:var(--text-dim); font-size:18px; cursor:pointer;
+    border-left:4px solid transparent;
+  }
+  .nav-item.active{ color:var(--cyan); border-left-color:var(--cyan); background:var(--panel2); }
+  .nav-item i{ width:18px; text-align:center; }
+
+  main{ flex:1; padding:32px; min-width:0; }
+  .topbar{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; flex-wrap:wrap; gap:12px;}
+  h1{ font-family:'Press Start 2P',monospace; font-size:18px; color:var(--text); margin:0 0 8px;}
+  .top-sub{ color:var(--text-dim); margin:0; }
+  .role-badge{
+    font-family:'Press Start 2P',monospace; font-size:11px; padding:8px 12px;
+    border:2px solid var(--cyan); color:var(--cyan);
+  }
+  .role-badge.admin{ border-color:var(--yellow); color:var(--yellow); }
+  #logoutBtn{
+    font-family:'Press Start 2P',monospace; font-size:11px; padding:10px 14px;
+    background:var(--panel2); color:var(--pink); border:2px solid var(--pink); cursor:pointer;
+  }
+
+  .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-bottom:28px; }
+  @media (max-width:800px){ .grid{ grid-template-columns:1fr; } .shell{flex-direction:column;} .sidebar{width:100%;} }
+  .stat{
+    border:3px solid var(--line); background:var(--panel); padding:18px;
+  }
+  .stat .label{ color:var(--text-dim); font-size:17px; margin-bottom:6px; }
+  .stat .value{ font-family:'Press Start 2P',monospace; font-size:22px; color:var(--text); }
+
+  .panel{
+    border:3px solid var(--line); background:var(--panel); padding:20px; margin-bottom:24px;
+  }
+  .panel h2{ font-family:'Press Start 2P',monospace; font-size:14px; color:var(--cyan); margin:0 0 16px; }
+
+  table{ width:100%; border-collapse:collapse; font-size:18px; }
+  th, td{ text-align:left; padding:10px 8px; border-bottom:1px solid var(--line); }
+  th{ color:var(--text-dim); font-weight:normal; }
+  .pill{ padding:3px 10px; font-size:14px; border:1px solid var(--cyan); color:var(--cyan); }
+  .pill.admin{ border-color:var(--yellow); color:var(--yellow); }
+
+  .heatgrid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .heat{ padding:16px; text-align:center; color:#0b0620; font-family:'Press Start 2P',monospace; font-size:11px; }
+  .loading{ text-align:center; padding:60px 20px; color:var(--text-dim); }
+</style>
+</head>
+<body>
+
+<div id="app" class="loading">Loading your dashboard...</div>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDe9YyitZB8W3Vi3sxSqdNEdSBdy_bx4Z8",
+    authDomain: "pb-s-scan-and-fun.firebaseapp.com",
+    projectId: "pb-s-scan-and-fun",
+    storageBucket: "pb-s-scan-and-fun.firebasestorage.app",
+    messagingSenderId: "518357088614",
+    appId: "1:518357088614:web:6a80004c6425c0e8b8b0a7"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  function fmtDate(ts){
+    if(!ts || !ts.toDate) return "—";
+    return ts.toDate().toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
+  }
+
+  async function renderDashboard(user, profile){
+    const isAdmin = profile.role === "admin";
+
+    let usersTableRows = "";
+    if(isAdmin){
+      const snap = await db.collection('users').orderBy('createdAt', 'desc').limit(50).get();
+      snap.forEach(doc => {
+        const d = doc.data();
+        usersTableRows += `<tr>
+          <td>${d.email || "—"}</td>
+          <td><span class="pill ${d.role === 'admin' ? 'admin' : ''}">${d.role || 'student'}</span></td>
+          <td>${d.loginCount ?? 0}</td>
+          <td>${fmtDate(d.lastLogin)}</td>
+        </tr>`;
+      });
+    }
+
+    document.getElementById('app').outerHTML = `
+    <div class="shell">
+      <div class="sidebar">
+        <div class="brand">PB'S SCAN<br>&amp; FUN</div>
+        <div class="nav-item active" data-tab="dashboard"><i class="fa-solid fa-gauge"></i> Dashboard</div>
+        <div class="nav-item" data-tab="challenges"><i class="fa-solid fa-square-check"></i> Daily Challenges</div>
+        <div class="nav-item" data-tab="quizbank"><i class="fa-solid fa-file-lines"></i> Quiz Bank</div>
+        <div class="nav-item" data-tab="rewards"><i class="fa-solid fa-trophy"></i> Rewards &amp; Badges</div>
+        <div class="nav-item" data-tab="analytics"><i class="fa-solid fa-chart-pie"></i> Skill Gap Analytics</div>
+        ${isAdmin ? '<div class="nav-item" data-tab="users"><i class="fa-solid fa-users"></i> All Users</div>' : ''}
+      </div>
+      <main>
+        <div class="topbar">
+          <div>
+            <h1>DASHBOARD OVERVIEW</h1>
+            <p class="top-sub">${user.email}</p>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span class="role-badge ${isAdmin ? 'admin' : ''}">${isAdmin ? 'ADMIN' : 'STUDENT'}</span>
+            <button id="logoutBtn">LOG OUT</button>
+          </div>
+        </div>
+
+        <div id="tab-dashboard" class="tab-panel">
+          <div class="grid">
+            <div class="stat"><div class="label">Member since</div><div class="value">${fmtDate(profile.createdAt)}</div></div>
+            <div class="stat"><div class="label">Last login</div><div class="value">${fmtDate(profile.lastLogin)}</div></div>
+            <div class="stat"><div class="label">Total logins</div><div class="value">${profile.loginCount ?? 1}</div></div>
+          </div>
+
+          <div class="panel">
+            <h2>SKILL GAP ANALYTICS (SAMPLE DATA)</h2>
+            <p class="top-sub" style="margin-bottom:14px;">Real numbers will populate here once quiz results connect from the main app.</p>
+            <div class="heatgrid">
+              <div class="heat" style="background:var(--green);">MATH</div>
+              <div class="heat" style="background:var(--yellow);">ALGEBRA</div>
+              <div class="heat" style="background:var(--pink);">CALCULUS</div>
+              <div class="heat" style="background:var(--green);">SCIENCE</div>
+              <div class="heat" style="background:var(--pink);">PHYSICS</div>
+              <div class="heat" style="background:var(--yellow);">CHEMISTRY</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-challenges" class="tab-panel" style="display:none;">
+          <div class="panel"><h2>DAILY CHALLENGES</h2><p class="top-sub">This section connects once the main quiz app is built and starts sending challenge data here.</p></div>
+        </div>
+        <div id="tab-quizbank" class="tab-panel" style="display:none;">
+          <div class="panel"><h2>QUIZ BANK</h2><p class="top-sub">This section connects once the main quiz app is built and starts sending quiz data here.</p></div>
+        </div>
+        <div id="tab-rewards" class="tab-panel" style="display:none;">
+          <div class="panel"><h2>REWARDS &amp; BADGES</h2><p class="top-sub">This section connects once the main quiz app is built and starts sending reward data here.</p></div>
+        </div>
+        <div id="tab-analytics" class="tab-panel" style="display:none;">
+          <div class="panel"><h2>SKILL GAP ANALYTICS</h2><p class="top-sub">Full breakdown view — connects once the main quiz app starts sending real quiz results here.</p></div>
+        </div>
+
+        ${isAdmin ? `
+        <div id="tab-users" class="tab-panel" style="display:none;">
+          <div class="panel">
+            <h2>ALL REGISTERED USERS</h2>
+            <table>
+              <thead><tr><th>Email</th><th>Role</th><th>Logins</th><th>Last login</th></tr></thead>
+              <tbody>${usersTableRows || '<tr><td colspan="4">No users yet.</td></tr>'}</tbody>
+            </table>
+          </div>
+        </div>` : ``}
+      </main>
+    </div>`;
+
+    document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
+
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+        const target = document.getElementById('tab-' + item.dataset.tab);
+        if(target) target.style.display = '';
+      });
+    });
+  }
+
+  auth.onAuthStateChanged(async (user) => {
+    if(!user){
+      window.location.href = "login.html";
+      return;
+    }
+    try {
+      const doc = await db.collection('users').doc(user.uid).get();
+      const profile = doc.exists ? doc.data() : { role: "student" };
+      renderDashboard(user, profile);
+    } catch(e){
+      document.getElementById('app').textContent = "Couldn't load your data: " + e.message;
+    }
+  });
+</script>
+
+</body>
+</html>

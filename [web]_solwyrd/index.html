@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PB's Scan and Fun</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js"></script>
+<style>
+  :root{
+    --bg: #100a24;
+    --bg-panel: #1c1240;
+    --bg-panel-2: #241854;
+    --line: #4a3b8a;
+    --cyan: #4de8d4;
+    --pink: #ff5d8f;
+    --yellow: #ffd23f;
+    --text: #eae6ff;
+    --text-dim: #a89fd6;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-sizing: border-box;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-padding-top: env(safe-area-inset-top, 0px);}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'VT323', monospace, Consolas, "Courier New", monospace;
+    font-size:20px;
+    line-height:1.5;
+  }
+  img{max-width:100%;}
+
+  .pixel-font{
+    font-family:'Press Start 2P', 'VT323', monospace;
+  }
+
+  /* blocky pixel border via layered box-shadow, no border-radius anywhere */
+  .pixel-box{
+    border:4px solid var(--line);
+    box-shadow:
+      0 0 0 4px var(--bg),
+      0 0 0 8px var(--line);
+    background:var(--bg-panel);
+  }
+
+  a{color:var(--yellow);}
+
+  header.hero{
+    padding:56px 20px 48px;
+    text-align:center;
+    background:
+      linear-gradient(180deg, #150c30 0%, #100a24 100%);
+    border-bottom:4px solid var(--line);
+  }
+  .crt-label{
+    display:inline-block;
+    font-family:'Press Start 2P', monospace;
+    font-size:11px;
+    letter-spacing:2px;
+    color:var(--cyan);
+    background:var(--bg-panel-2);
+    border:2px solid var(--cyan);
+    padding:6px 12px;
+    margin-bottom:22px;
+  }
+  h1.title{
+    font-family:'Press Start 2P', monospace;
+    font-size:clamp(22px, 6vw, 42px);
+    line-height:1.5;
+    margin:0 0 18px;
+    color:var(--yellow);
+    text-shadow: 3px 3px 0 var(--pink);
+  }
+  .subtitle{
+    max-width:560px;
+    margin:0 auto 30px;
+    font-size:22px;
+    color:var(--text-dim);
+  }
+  .subtitle b{color:var(--text);}
+  .cta-row{
+    display:flex;
+    gap:16px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  .btn{
+    font-family:'Press Start 2P', monospace;
+    font-size:12px;
+    padding:14px 20px;
+    background:var(--pink);
+    color:#100a24;
+    border:0;
+    box-shadow: 4px 4px 0 var(--line);
+    cursor:pointer;
+    text-decoration:none;
+    display:inline-block;
+  }
+  .btn:active{
+    box-shadow: 2px 2px 0 var(--line);
+    transform:translate(2px,2px);
+  }
+  .btn.secondary{
+    background:var(--bg-panel-2);
+    color:var(--cyan);
+    box-shadow: 4px 4px 0 var(--cyan);
+  }
+
+  main{max-width:1000px; margin:0 auto; padding:0 20px;}
+
+  section{padding:56px 0;}
+  section + section{border-top:2px dashed var(--line);}
+
+  h2.section-title{
+    font-family:'Press Start 2P', monospace;
+    font-size:clamp(16px, 3.5vw, 22px);
+    color:var(--cyan);
+    text-align:center;
+    margin:0 0 40px;
+  }
+
+  .mode-grid{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:24px;
+  }
+  @media (max-width:640px){
+    .mode-grid{grid-template-columns:1fr;}
+  }
+  .mode-card{
+    padding:22px 20px;
+  }
+  .mode-card .icon{
+    font-family:'Press Start 2P', monospace;
+    font-size:26px;
+    color:var(--yellow);
+    margin-bottom:14px;
+  }
+  .mode-card h3{
+    font-family:'Press Start 2P', monospace;
+    font-size:14px;
+    color:var(--text);
+    margin:0 0 12px;
+  }
+  .mode-card p{
+    margin:0;
+    color:var(--text-dim);
+    font-size:20px;
+  }
+
+  .flow{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:10px;
+    font-family:'Press Start 2P', monospace;
+    font-size:11px;
+    color:var(--text);
+    margin-bottom:44px;
+  }
+  .flow span{
+    background:var(--bg-panel-2);
+    border:2px solid var(--line);
+    padding:10px 12px;
+  }
+  .flow .arrow{
+    background:none;
+    border:none;
+    color:var(--pink);
+    align-self:center;
+    padding:0 2px;
+  }
+
+  .feature-strip{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:16px;
+  }
+  @media (max-width:640px){
+    .feature-strip{grid-template-columns:repeat(2, 1fr);}
+  }
+  .feature-strip .f{
+    padding:16px 10px;
+    text-align:center;
+  }
+  .feature-strip .f .glyph{
+    font-family:'Press Start 2P', monospace;
+    color:var(--cyan);
+    font-size:20px;
+    margin-bottom:10px;
+  }
+  .feature-strip .f p{
+    margin:0;
+    font-size:18px;
+    color:var(--text-dim);
+  }
+
+  .credits{
+    text-align:center;
+    color:var(--text-dim);
+  }
+  .credits .studio{
+    font-family:'Press Start 2P', monospace;
+    color:var(--yellow);
+    font-size:14px;
+    margin-bottom:10px;
+  }
+
+  footer{
+    padding:36px 20px 48px;
+    text-align:center;
+    font-size:16px;
+    color:var(--text-dim);
+    border-top:4px solid var(--line);
+  }
+  footer .blink{
+    animation: blink 1.4s steps(1) infinite;
+    color:var(--pink);
+  }
+  @keyframes blink{ 50%{opacity:0;} }
+
+  @media (prefers-reduced-motion: reduce){
+    .blink{animation:none;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="crt-label">SCHOOL PROJECT PROTOTYPE</span>
+  <h1 class="title">PB's Scan&nbsp;&amp;&nbsp;Fun</h1>
+  <p class="subtitle">
+    A <b>gamified quiz-based performance enhancer</b> — turn your own notes into an RPG battle.
+    Scan a page, get a quiz, fight your way through Story Mode. Built by <b>Programming Badger</b>.
+  </p>
+  <div class="cta-row">
+    <a class="btn" href="#modes">SEE MODES</a>
+    <a class="btn secondary" href="#about">HOW IT WORKS</a>
+    <a class="btn secondary" href="login.html">LOG IN</a>
+  </div>
+</header>
+
+<main>
+
+  <section id="about">
+    <h2 class="section-title">WHAT IS THIS?</h2>
+    <p style="text-align:center; max-width:680px; margin:0 auto 36px; color:var(--text-dim); font-size:21px;">
+      PB's Scan and Fun turns studying into a turn-based RPG. Upload or scan a document,
+      an AI reads it and builds a quiz, and every correct answer lands a hit on the enemy —
+      just like a classic Pokémon-style battle.
+    </p>
+    <div class="flow">
+      <span>SCAN&nbsp;/&nbsp;UPLOAD</span>
+      <span class="arrow">➜</span>
+      <span>AI MAKES QUIZ</span>
+      <span class="arrow">➜</span>
+      <span>PICK DIFFICULTY</span>
+      <span class="arrow">➜</span>
+      <span>TURN-BASED BATTLE</span>
+      <span class="arrow">➜</span>
+      <span>XP &amp; REWARDS</span>
+    </div>
+  </section>
+
+  <section id="modes">
+    <h2 class="section-title">GAME MODES</h2>
+    <div class="mode-grid">
+      <div class="mode-box pixel-box mode-card">
+        <div class="icon"><i class="fa-solid fa-scroll"></i></div>
+        <h3>STORY MODE</h3>
+        <p>Follow the main questline through PB Presents — level up your character and battle
+        through a scripted RPG campaign.</p>
+      </div>
+      <div class="mode-box pixel-box mode-card">
+        <div class="icon"><i class="fa-solid fa-file-lines"></i></div>
+        <h3>CREATE YOUR OWN</h3>
+        <p>Upload a document or scan a single page of notes. The AI reads it and builds a custom
+        quiz-battle just for that material.</p>
+      </div>
+      <div class="mode-box pixel-box mode-card">
+        <div class="icon"><i class="fa-solid fa-globe"></i></div>
+        <h3>ONLINE</h3>
+        <p>Host or join a lobby, pick a character and a map, and battle other players 1v1,
+        2&nbsp;vs&nbsp;E, or in an 8-player tournament.</p>
+      </div>
+      <div class="mode-box pixel-box mode-card">
+        <div class="icon"><i class="fa-solid fa-wifi"></i></div>
+        <h3>LAN</h3>
+        <p>No internet? No problem. Play locally over Wi-Fi or hotspot with nearby classmates.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title">MILESTONES &amp; ANALYTICS</h2>
+    <div class="feature-strip">
+      <div class="f"><div class="glyph"><i class="fa-solid fa-star"></i></div><p>Quests</p></div>
+      <div class="f"><div class="glyph"><i class="fa-solid fa-trophy"></i></div><p>Achievements</p></div>
+      <div class="f"><div class="glyph"><i class="fa-solid fa-chart-line"></i></div><p>Ranking</p></div>
+      <div class="f"><div class="glyph"><i class="fa-solid fa-cart-shopping"></i></div><p>Shop</p></div>
+    </div>
+  </section>
+
+  <section class="credits">
+    <div class="studio">PB PRESENTS</div>
+    <p>A student-built prototype exploring gamified learning.<br>
+    Concept &amp; design by Programming Badger.</p>
+  </section>
+
+</main>
+
+<footer>
+  <p>PB's Scan and Fun — prototype webpage for a school activity<span class="blink">_</span></p>
+</footer>
+
+</body>
+</html>
